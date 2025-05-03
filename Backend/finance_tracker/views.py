@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import login, logout
 from django.db.models import Sum
 from django.utils import timezone
@@ -20,10 +21,12 @@ class UserRegistrationView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'message': 'User created successfully',
                 'user_id': user.id,
-                'username': user.username
+                'username': user.username,
+                'token': token.key
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -38,10 +41,12 @@ class UserLoginView(APIView):
         user = authenticate(username=username, password=password)
         if user:
             login(request, user)
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'message': 'Login successful',
                 'user_id': user.id,
-                'username': user.username
+                'username': user.username,
+                'token': token.key
             })
         return Response({
             'message': 'Invalid credentials'
@@ -54,6 +59,16 @@ class UserLogoutView(APIView):
         logout(request)
         return Response({
             'message': 'Logout successful'
+        })
+
+class UserView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        return Response({
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email
         })
 
 class CategoryViewSet(viewsets.ModelViewSet):

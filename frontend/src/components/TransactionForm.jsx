@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  Box,
   TextField,
   Button,
   Grid,
@@ -8,25 +9,36 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Box,
 } from '@mui/material';
-import { addTransaction, fetchCategories } from '../store/slices/transactionSlice';
+import { fetchCategories } from '../store/slices/categorySlice';
+import { addTransaction } from '../store/slices/transactionSlice';
 
 function TransactionForm() {
   const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.transactions);
-
+  const { categories } = useSelector((state) => state.categories);
   const [formData, setFormData] = useState({
-    description: '',
     amount: '',
+    description: '',
     transaction_type: 'expense',
-    category: '',
+    category_id: '',
     date: new Date().toISOString().split('T')[0],
   });
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(addTransaction(formData));
+    setFormData({
+      amount: '',
+      description: '',
+      transaction_type: 'expense',
+      category_id: '',
+      date: new Date().toISOString().split('T')[0],
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,31 +48,9 @@ function TransactionForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    dispatch(addTransaction(formData));
-    setFormData({
-      description: '',
-      amount: '',
-      transaction_type: 'expense',
-      category: '',
-      date: new Date().toISOString().split('T')[0],
-    });
-  };
-
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+    <Box component="form" onSubmit={handleSubmit} noValidate>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            required
-            fullWidth
-            label="Description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-          />
-        </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
             required
@@ -73,6 +63,18 @@ function TransactionForm() {
             inputProps={{ step: '0.01' }}
           />
         </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            required
+            fullWidth
+            label="Description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+          />
+        </Grid>
+
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
             <InputLabel>Type</InputLabel>
@@ -87,12 +89,13 @@ function TransactionForm() {
             </Select>
           </FormControl>
         </Grid>
+
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
             <InputLabel>Category</InputLabel>
             <Select
-              name="category"
-              value={formData.category}
+              name="category_id"
+              value={formData.category_id}
               onChange={handleChange}
               label="Category"
             >
@@ -104,7 +107,8 @@ function TransactionForm() {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={12} sm={6}>
+
+        <Grid item xs={12}>
           <TextField
             required
             fullWidth
@@ -113,9 +117,12 @@ function TransactionForm() {
             type="date"
             value={formData.date}
             onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
         </Grid>
+
         <Grid item xs={12}>
           <Button
             type="submit"

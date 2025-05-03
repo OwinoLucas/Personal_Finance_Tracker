@@ -4,31 +4,27 @@ import { useNavigate, Outlet } from 'react-router-dom';
 import {
   AppBar,
   Box,
-  CssBaseline,
-  Drawer,
+  Toolbar,
   IconButton,
+  Typography,
+  Menu,
+  MenuItem,
+  Avatar,
+  Drawer,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Toolbar,
-  Typography,
+  Divider,
   Button,
-  Menu,
-  MenuItem,
-  Avatar,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   Category as CategoryIcon,
   Add as AddIcon,
-  Logout as LogoutIcon,
-  AccountCircle,
 } from '@mui/icons-material';
 import { logout } from '../store/slices/authSlice';
-
-const drawerWidth = 240;
 
 function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -41,11 +37,11 @@ function Layout() {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleMenu = (event) => {
+  const handleUserMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleUserMenuClose = () => {
     setAnchorEl(null);
   };
 
@@ -55,45 +51,40 @@ function Layout() {
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-    { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
-    { text: 'Add Transaction', icon: <AddIcon />, path: '/transactions/new' },
+    { text: 'Dashboard', path: '/', icon: <DashboardIcon /> },
+    { text: 'Categories', path: '/categories', icon: <CategoryIcon /> },
+    { text: 'Add Transaction', path: '/transactions/new', icon: <AddIcon /> },
   ];
 
   const drawer = (
     <div>
-      <Toolbar />
+      <Toolbar>
+        <Typography variant="h6" noWrap component="div">
+          Finance Tracker
+        </Typography>
+      </Toolbar>
+      <Divider />
       <List>
         {menuItems.map((item) => (
           <ListItem
             button
             key={item.text}
-            onClick={() => navigate(item.path)}
+            onClick={() => {
+              navigate(item.path);
+              setMobileOpen(false);
+            }}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItem>
         ))}
-        <ListItem button onClick={handleLogout}>
-          <ListItemIcon>
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText primary="Logout" />
-        </ListItem>
       </List>
     </div>
   );
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-        }}
-      >
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -104,63 +95,66 @@ function Layout() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Personal Finance Tracker
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            Finance Tracker
           </Typography>
-          {user ? (
-            <div>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-              </Menu>
-            </div>
-          ) : (
-            <Button color="inherit" onClick={() => navigate('/login')}>
-              Login
-            </Button>
-          )}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              onClick={handleUserMenu}
+              size="small"
+              sx={{ ml: 2 }}
+              aria-controls={Boolean(anchorEl) ? 'account-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
+            >
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+                {user?.username?.charAt(0).toUpperCase()}
+              </Avatar>
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
+
+      <Menu
+        anchorEl={anchorEl}
+        id="account-menu"
+        open={Boolean(anchorEl)}
+        onClose={handleUserMenuClose}
+        onClick={handleUserMenuClose}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem>
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+            {user?.username}
+          </Typography>
+        </MenuItem>
+        <MenuItem>
+          <Typography variant="body2" color="text.secondary">
+            {user?.email}
+          </Typography>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout}>
+          <Typography variant="body2">Sign out</Typography>
+        </MenuItem>
+      </Menu>
+
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { sm: 240 }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
       >
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true,
+            keepMounted: true, // Better open performance on mobile.
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
           }}
         >
           {drawer}
@@ -169,25 +163,23 @@ function Layout() {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
           }}
           open
         >
           {drawer}
         </Drawer>
       </Box>
+
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: { sm: `calc(100% - 240px)` },
+          mt: '64px',
         }}
       >
-        <Toolbar />
         <Outlet />
       </Box>
     </Box>

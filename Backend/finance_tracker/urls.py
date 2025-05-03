@@ -5,7 +5,8 @@ from .views import (
     TransactionViewSet, 
     UserRegistrationView,
     UserLoginView,
-    UserLogoutView
+    UserLogoutView,
+    UserView
 )
 
 router = DefaultRouter()
@@ -17,4 +18,5 @@ urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('login/', UserLoginView.as_view(), name='login'),
     path('logout/', UserLogoutView.as_view(), name='logout'),
+    path('user/', UserView.as_view(), name='user'),
 ]

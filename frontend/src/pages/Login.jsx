@@ -1,81 +1,67 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
+  Box,
+  Button,
+  TextField,
+  Typography,
   Container,
   Paper,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Link,
+  CircularProgress,
 } from '@mui/material';
-import { login, clearError } from '../store/slices/authSlice';
+import { login } from '../store/slices/authSlice';
 
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.auth);
-
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(clearError());
     const result = await dispatch(login(formData));
     if (!result.error) {
-      navigate('/dashboard');
+      navigate('/');
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper
-          elevation={3}
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <Paper elevation={3} sx={{ p: 6, borderRadius: 2 }}>
+        <Box
           sx={{
-            padding: 4,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            width: '100%',
           }}
         >
-          <Typography component="h1" variant="h5">
+          <Typography component="h1" variant="h4" sx={{ mb: 4 }}>
             Sign in
           </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{ mt: 1, width: '100%' }}
-          >
+          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
             <TextField
               margin="normal"
               required
               fullWidth
+              id="username"
               label="Username"
               name="username"
+              autoComplete="username"
+              autoFocus
               value={formData.username}
               onChange={handleChange}
-              autoFocus
+              sx={{ mb: 3 }}
             />
             <TextField
               margin="normal"
@@ -84,11 +70,14 @@ function Login() {
               name="password"
               label="Password"
               type="password"
+              id="password"
+              autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
+              sx={{ mb: 3 }}
             />
             {error && (
-              <Typography color="error" sx={{ mt: 2 }}>
+              <Typography color="error" sx={{ mb: 2 }}>
                 {error}
               </Typography>
             )}
@@ -96,19 +85,23 @@ function Login() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              size="large"
+              sx={{ mt: 3, mb: 2, py: 1.5 }}
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? <CircularProgress size={24} /> : 'Sign In'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
-              <Link href="/register" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+              <Typography variant="body1">
+                Don't have an account?{' '}
+                <Link to="/register" style={{ textDecoration: 'none', color: '#1976d2' }}>
+                  Sign Up
+                </Link>
+              </Typography>
             </Box>
           </Box>
-        </Paper>
-      </Box>
+        </Box>
+      </Paper>
     </Container>
   );
 }
