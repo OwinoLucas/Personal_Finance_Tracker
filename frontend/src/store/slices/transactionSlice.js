@@ -8,7 +8,7 @@ export const fetchTransactions = createAsyncThunk(
       const response = await axiosInstance.get('/api/transactions/');
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to fetch transactions');
+      return rejectWithValue(error.response?.data || 'Error fetching transactions');
     }
   }
 );
@@ -28,7 +28,7 @@ export const fetchSummary = createAsyncThunk(
       const response = await axiosInstance.get('/api/transactions/summary/');
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to fetch summary');
+      return rejectWithValue(error.response?.data || 'Error fetching summary');
     }
   }
 );
@@ -40,7 +40,7 @@ export const addTransaction = createAsyncThunk(
       const response = await axiosInstance.post('/api/transactions/', transactionData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to add transaction');
+      return rejectWithValue(error.response?.data || 'Error adding transaction');
     }
   }
 );
@@ -52,7 +52,7 @@ export const updateTransaction = createAsyncThunk(
       const response = await axiosInstance.put(`/api/transactions/${id}/`, transactionData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to update transaction');
+      return rejectWithValue(error.response?.data || 'Error updating transaction');
     }
   }
 );
@@ -64,7 +64,7 @@ export const deleteTransaction = createAsyncThunk(
       await axiosInstance.delete(`/api/transactions/${id}/`);
       return id;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to delete transaction');
+      return rejectWithValue(error.response?.data || 'Error deleting transaction');
     }
   }
 );
@@ -74,11 +74,7 @@ const transactionSlice = createSlice({
   initialState: {
     transactions: [],
     categories: [],
-    summary: {
-      total_income: 0,
-      total_expenses: 0,
-      net_balance: 0,
-    },
+    summary: null,
     loading: false,
     error: null,
   },
@@ -116,19 +112,46 @@ const transactionSlice = createSlice({
         state.error = action.payload;
       })
       // Add Transaction
+      .addCase(addTransaction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(addTransaction.fulfilled, (state, action) => {
+        state.loading = false;
         state.transactions.push(action.payload);
       })
+      .addCase(addTransaction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // Update Transaction
+      .addCase(updateTransaction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateTransaction.fulfilled, (state, action) => {
+        state.loading = false;
         const index = state.transactions.findIndex(t => t.id === action.payload.id);
         if (index !== -1) {
           state.transactions[index] = action.payload;
         }
       })
+      .addCase(updateTransaction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // Delete Transaction
+      .addCase(deleteTransaction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deleteTransaction.fulfilled, (state, action) => {
+        state.loading = false;
         state.transactions = state.transactions.filter(t => t.id !== action.payload);
+      })
+      .addCase(deleteTransaction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

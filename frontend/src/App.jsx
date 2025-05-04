@@ -1,36 +1,40 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useSelector } from 'react-redux';
-import theme from './theme';
-import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
 import Categories from './pages/Categories';
 import AddTransaction from './pages/AddTransaction';
 
-function PrivateRoute({ children }) {
-  const { token } = useSelector((state) => state.auth);
-  console.log('PrivateRoute - token:', token);
-  return token ? children : <Navigate to="/login" />;
-}
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
 
 function App() {
-  console.log('App component rendered');
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
             path="/"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <Layout />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           >
             <Route index element={<Dashboard />} />

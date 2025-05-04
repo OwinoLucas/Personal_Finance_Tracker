@@ -1,46 +1,43 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import {
-  Typography,
   TextField,
   Button,
   MenuItem,
-  CircularProgress,
-  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  FormControlLabel,
+  Switch,
+  Box,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { addTransaction } from '../store/slices/transactionSlice';
 import { fetchCategories } from '../store/slices/categorySlice';
 
 function AddTransaction() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { categories } = useSelector((state) => state.categories);
-  const { loading, error } = useSelector((state) => state.transactions);
-
   const [formData, setFormData] = useState({
     amount: '',
     description: '',
     transaction_type: 'expense',
     category: '',
-    date: new Date().toISOString().split('T')[0],
+    date: new Date(),
+    is_recurring: false,
+    frequency: '',
+    end_date: null,
   });
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    dispatch(addTransaction(formData))
-      .unwrap()
-      .then(() => {
-        navigate('/');
-      })
-      .catch((error) => {
-        console.error('Error adding transaction:', error);
-      });
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,122 +47,160 @@ function AddTransaction() {
     }));
   };
 
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <CircularProgress />
-      </div>
-    );
-  }
+  const handleDateChange = (date) => {
+    setFormData((prev) => ({
+      ...prev,
+      date,
+    }));
+  };
+
+  const handleEndDateChange = (date) => {
+    setFormData((prev) => ({
+      ...prev,
+      end_date: date,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(addTransaction(formData));
+    setFormData({
+      amount: '',
+      description: '',
+      transaction_type: 'expense',
+      category: '',
+      date: new Date(),
+      is_recurring: false,
+      frequency: '',
+      end_date: null,
+    });
+  };
 
   return (
-    <Fragment>
-      <div className="container" style={{ padding: '2rem' }}>
-        <div className="card" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <div className="form-header">
-            <Typography variant="h4" gutterBottom>
-              Add New Transaction
-            </Typography>
-
-            {error && (
-              <Alert severity="error" style={{ marginBottom: '1.5rem' }}>
-                {error}
-              </Alert>
-            )}
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
-              <div className="form-field" style={{ flex: '1 1 45%' }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Amount"
-                  name="amount"
-                  type="number"
-                  value={formData.amount}
-                  onChange={handleChange}
-                  InputProps={{
-                    startAdornment: 'KES ',
-                  }}
-                />
-              </div>
-              <div className="form-field" style={{ flex: '1 1 45%' }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="form-field" style={{ flex: '1 1 45%' }}>
-                <TextField
-                  fullWidth
-                  required
-                  select
-                  label="Type"
+    <Card>
+      <CardContent>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6">Add New Transaction</Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.is_recurring}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  is_recurring: e.target.checked
+                }))}
+              />
+            }
+            label="Recurring Transaction"
+          />
+        </Box>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Amount"
+                name="amount"
+                type="number"
+                value={formData.amount}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Type</InputLabel>
+                <Select
                   name="transaction_type"
                   value={formData.transaction_type}
                   onChange={handleChange}
+                  required
                 >
                   <MenuItem value="income">Income</MenuItem>
                   <MenuItem value="expense">Expense</MenuItem>
-                </TextField>
-              </div>
-              <div className="form-field" style={{ flex: '1 1 45%' }}>
-                <TextField
-                  fullWidth
-                  required
-                  select
-                  label="Category"
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Category</InputLabel>
+                <Select
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
+                  required
                 >
                   {categories.map((category) => (
                     <MenuItem key={category.id} value={category.id}>
                       {category.name}
                     </MenuItem>
                   ))}
-                </TextField>
-              </div>
-              <div className="form-field" style={{ flex: '1 1 45%' }}>
-                <TextField
-                  fullWidth
-                  required
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
                   label="Date"
-                  name="date"
-                  type="date"
                   value={formData.date}
-                  onChange={handleChange}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
+                  onChange={handleDateChange}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
                 />
-              </div>
-            </div>
+              </LocalizationProvider>
+            </Grid>
 
-            <div className="form-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
-              <Button
-                variant="outlined"
-                onClick={() => navigate('/')}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-              >
-                Add Transaction
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Fragment>
+            {formData.is_recurring && (
+              <>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Frequency</InputLabel>
+                    <Select
+                      name="frequency"
+                      value={formData.frequency}
+                      onChange={handleChange}
+                      required
+                    >
+                      <MenuItem value="daily">Daily</MenuItem>
+                      <MenuItem value="weekly">Weekly</MenuItem>
+                      <MenuItem value="monthly">Monthly</MenuItem>
+                      <MenuItem value="yearly">Yearly</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      label="End Date"
+                      value={formData.end_date}
+                      onChange={handleEndDateChange}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+              </>
+            )}
+
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button type="submit" variant="contained" color="primary">
+                  Add Transaction
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 

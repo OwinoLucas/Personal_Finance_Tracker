@@ -29,7 +29,7 @@ import {
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
-import { logout } from '../store/slices/authSlice';
+import { logout, fetchUser } from '../store/slices/authSlice';
 import './Layout.css';
 
 function Layout() {
@@ -37,29 +37,33 @@ function Layout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [anchorEl, setAnchorEl] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     console.log('Layout mounted');
-  }, []);
+    if (isAuthenticated && !user) {
+      dispatch(fetchUser());
+    }
+  }, [dispatch, isAuthenticated, user]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleUserMenu = (event) => {
+  const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleUserMenuClose = () => {
+  const handleClose = () => {
     setAnchorEl(null);
   };
 
   const handleLogout = () => {
     dispatch(logout());
+    handleClose();
     navigate('/login');
   };
 
@@ -132,25 +136,26 @@ function Layout() {
             <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
               Finance Tracker
             </Typography>
-            {user && (
-              <div className="user-menu-container">
+            {isAuthenticated && user && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body1" sx={{ mr: 2 }}>
+                  {user.username}
+                </Typography>
                 <IconButton
                   size="large"
                   aria-label="account of current user"
                   aria-controls="menu-appbar"
                   aria-haspopup="true"
-                  onClick={handleUserMenu}
+                  onClick={handleMenu}
                   color="inherit"
                 >
-                  <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-                    {user.username[0].toUpperCase()}
-                  </Avatar>
+                  <AccountCircleIcon />
                 </IconButton>
                 <Menu
                   id="menu-appbar"
                   anchorEl={anchorEl}
                   anchorOrigin={{
-                    vertical: 'bottom',
+                    vertical: 'top',
                     horizontal: 'right',
                   }}
                   keepMounted
@@ -159,26 +164,11 @@ function Layout() {
                     horizontal: 'right',
                   }}
                   open={Boolean(anchorEl)}
-                  onClose={handleUserMenuClose}
+                  onClose={handleClose}
                 >
-                  <MenuItem disabled>
-                    <ListItemIcon>
-                      <AccountCircleIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary={user.username}
-                      secondary={user.email}
-                    />
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem onClick={handleLogout}>
-                    <ListItemIcon>
-                      <LogoutIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText primary="Sign out" />
-                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 </Menu>
-              </div>
+              </Box>
             )}
           </Toolbar>
         </AppBar>

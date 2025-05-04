@@ -59,7 +59,6 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
-      // Transform the data to match backend expectations
       const registrationData = {
         username: userData.username,
         email: userData.email,
@@ -82,22 +81,37 @@ export const register = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk(
-  'auth/logout',
-  async () => {
-    localStorage.removeItem('token');
-  }
-);
+const initialState = {
+  user: null,
+  token: localStorage.getItem('token'),
+  isAuthenticated: !!localStorage.getItem('token'),
+  loading: false,
+  error: null,
+};
 
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    token: localStorage.getItem('token'),
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {
+    loginStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    loginSuccess: (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      localStorage.setItem('token', action.payload.token);
+    },
+    loginFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem('token');
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -112,11 +126,14 @@ const authSlice = createSlice({
       .addCase(fetchUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+        state.user = null;
         state.token = null;
+        state.isAuthenticated = false;
         localStorage.removeItem('token');
       })
       // Login
@@ -126,12 +143,17 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
         state.token = action.payload.token;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        localStorage.removeItem('token');
       })
       // Register
       .addCase(register.pending, (state) => {
@@ -140,21 +162,27 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
         state.token = action.payload.token;
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
-      })
-      // Logout
-      .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;
+        state.isAuthenticated = false;
+        localStorage.removeItem('token');
       });
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, clearError } = authSlice.actions;
+
+// Create a logout thunk that uses the slice's reducer
+export const logout = () => (dispatch) => {
+  localStorage.removeItem('token');
+  dispatch(authSlice.actions.loginFailure(null));
+};
 
 export default authSlice.reducer; 

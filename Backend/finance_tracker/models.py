@@ -23,6 +23,13 @@ class Transaction(models.Model):
         ('expense', 'Expense'),
     ]
 
+    FREQUENCY_CHOICES = [
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+        ('yearly', 'Yearly'),
+    ]
+
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
@@ -31,6 +38,12 @@ class Transaction(models.Model):
     date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # Recurring transaction fields
+    is_recurring = models.BooleanField(default=False)
+    frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES, null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    last_processed = models.DateField(null=True, blank=True)
 
     class Meta:
         ordering = ['-date', '-created_at']
