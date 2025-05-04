@@ -1,42 +1,32 @@
-import { useEffect } from 'react';
+import { useEffect, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts';
-import {
-  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  LinearProgress,
+  CircularProgress,
+  Alert,
   Card,
   CardContent,
-  Typography,
-  Grid,
-  CircularProgress,
-  Container,
 } from '@mui/material';
 import {
   fetchTransactions,
   fetchSummary,
 } from '../store/slices/transactionSlice';
-import TransactionList from '../components/TransactionList';
-import TransactionForm from '../components/TransactionForm';
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+import { fetchCategories } from '../store/slices/categorySlice';
+import AddTransaction from './AddTransaction';
 
 function Dashboard() {
   const dispatch = useDispatch();
-  const { summary, transactions, loading } = useSelector((state) => state.transactions);
+  const { summary, transactions, loading, error } = useSelector((state) => state.transactions);
+  const { categories } = useSelector((state) => state.categories);
 
   useEffect(() => {
     dispatch(fetchTransactions());
     dispatch(fetchSummary());
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   const categoryData = transactions.reduce((acc, transaction) => {
@@ -47,175 +37,118 @@ function Dashboard() {
     return acc;
   }, {});
 
-  const pieData = Object.entries(categoryData).map(([name, value]) => ({
-    name,
-    value,
-  }));
+  const totalExpenses = Object.values(categoryData).reduce((sum, amount) => sum + amount, 0);
 
   if (loading) {
     return (
-      <Box className="loading-spinner">
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <CircularProgress />
-      </Box>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '1rem' }}>
+        <Alert severity="error">{error}</Alert>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Grid container spacing={3}>
+    <Fragment>
+      <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
         {/* Summary Cards */}
-        <Grid item xs={12} md={4}>
-          <Card className="dashboard-card">
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+          <Card style={{ minWidth: '250px', flex: 1 }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ mr: 2 }}>
-                  <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Balance
-                  </Typography>
-                  <Typography variant="h5" component="div">
-                    ${summary?.total_balance?.toFixed(2) || '0.00'}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card className="dashboard-card">
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ mr: 2 }}>
-                  <svg className="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Income
-                  </Typography>
-                  <Typography variant="h5" component="div" color="success.main">
-                    ${summary?.total_income?.toFixed(2) || '0.00'}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card className="dashboard-card">
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ mr: 2 }}>
-                  <svg className="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Expenses
-                  </Typography>
-                  <Typography variant="h5" component="div" color="error.main">
-                    ${summary?.total_expenses?.toFixed(2) || '0.00'}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Charts */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Expenses by Category
+              <Typography variant="h6" gutterBottom>Total Balance</Typography>
+              <Typography variant="h4" color="primary">
+                KES {summary?.net_balance || 0}
               </Typography>
-              <Box className="chart-container">
-                <PieChart width={400} height={250}>
-                  <Pie
-                    data={pieData}
-                    cx={200}
-                    cy={125}
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </Box>
             </CardContent>
           </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
+          <Card style={{ minWidth: '250px', flex: 1 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Monthly Overview
+              <Typography variant="h6" gutterBottom>Total Income</Typography>
+              <Typography variant="h4" color="success.main">
+                KES {summary?.total_income || 0}
               </Typography>
-              <Box className="chart-container">
-                <BarChart
-                  width={400}
-                  height={250}
-                  data={transactions}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="amount" fill="#8884d8" />
-                </BarChart>
-              </Box>
             </CardContent>
           </Card>
-        </Grid>
-
-        {/* Recent Transactions */}
-        <Grid item xs={12}>
-          <Card>
+          <Card style={{ minWidth: '250px', flex: 1 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Recent Transactions
+              <Typography variant="h6" gutterBottom>Total Expenses</Typography>
+              <Typography variant="h4" color="error.main">
+                KES {summary?.total_expenses || 0}
               </Typography>
-              <TransactionList />
             </CardContent>
           </Card>
-        </Grid>
+        </div>
+
+        {/* Expenses by Category & Recent Transactions */}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+          <Card style={{ flex: 1, minWidth: '300px' }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Expenses by Category</Typography>
+              <List>
+                {Object.entries(categoryData).map(([category, amount]) => (
+                  <div key={category} style={{ marginBottom: '1rem' }}>
+                    <ListItem disablePadding>
+                      <ListItemText
+                        primary={category}
+                        secondary={`KES ${amount.toFixed(2)} (${((amount / totalExpenses) * 100).toFixed(1)}%)`}
+                      />
+                      <div style={{ width: '100%', maxWidth: 200 }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={(amount / totalExpenses) * 100}
+                          sx={{
+                            height: 10,
+                            borderRadius: 5,
+                            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                            '& .MuiLinearProgress-bar': {
+                              backgroundColor: 'primary.main',
+                            },
+                          }}
+                        />
+                      </div>
+                    </ListItem>
+                  </div>
+                ))}
+              </List>
+            </CardContent>
+          </Card>
+
+          <Card style={{ flex: 1, minWidth: '300px' }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Recent Transactions</Typography>
+              <List>
+                {transactions.slice(0, 5).map((transaction) => (
+                  <div key={transaction.id} style={{ marginBottom: '1rem' }}>
+                    <ListItem disablePadding>
+                      <ListItemText
+                        primary={transaction.description}
+                        secondary={`${new Date(transaction.date).toLocaleDateString()} - KES ${transaction.amount}`}
+                      />
+                      <Typography color={transaction.transaction_type === 'income' ? 'success.main' : 'error.main'}>
+                        {transaction.transaction_type}
+                      </Typography>
+                    </ListItem>
+                  </div>
+                ))}
+              </List>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Add Transaction Form */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Add New Transaction
-              </Typography>
-              <TransactionForm />
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
+        <div>
+          <AddTransaction />
+        </div>
+      </div>
+    </Fragment>
   );
 }
 
-export default Dashboard; 
+export default Dashboard;

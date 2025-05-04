@@ -1,45 +1,71 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8000/api';
+import axiosInstance from '../../utils/axiosInstance';
 
 export const fetchTransactions = createAsyncThunk(
   'transactions/fetchTransactions',
-  async () => {
-    const response = await axios.get(`${API_URL}/transactions/`);
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get('/api/transactions/');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch transactions');
+    }
   }
 );
 
 export const fetchCategories = createAsyncThunk(
   'transactions/fetchCategories',
   async () => {
-    const response = await axios.get(`${API_URL}/categories/`);
+    const response = await axiosInstance.get('/api/categories/');
     return response.data;
   }
 );
 
 export const fetchSummary = createAsyncThunk(
   'transactions/fetchSummary',
-  async () => {
-    const response = await axios.get(`${API_URL}/transactions/summary/`);
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get('/api/transactions/summary/');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch summary');
+    }
   }
 );
 
 export const addTransaction = createAsyncThunk(
   'transactions/addTransaction',
-  async (transactionData) => {
-    const response = await axios.post(`${API_URL}/transactions/`, transactionData);
-    return response.data;
+  async (transactionData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('/api/transactions/', transactionData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to add transaction');
+    }
+  }
+);
+
+export const updateTransaction = createAsyncThunk(
+  'transactions/updateTransaction',
+  async ({ id, transactionData }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/api/transactions/${id}/`, transactionData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to update transaction');
+    }
   }
 );
 
 export const deleteTransaction = createAsyncThunk(
   'transactions/deleteTransaction',
-  async (id) => {
-    await axios.delete(`${API_URL}/transactions/${id}/`);
-    return id;
+  async (id, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`/api/transactions/${id}/`);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to delete transaction');
+    }
   }
 );
 
@@ -49,9 +75,9 @@ const transactionSlice = createSlice({
     transactions: [],
     categories: [],
     summary: {
-      totalIncome: 0,
-      totalExpenses: 0,
-      netBalance: 0,
+      total_income: 0,
+      total_expenses: 0,
+      net_balance: 0,
     },
     loading: false,
     error: null,
@@ -62,6 +88,7 @@ const transactionSlice = createSlice({
       // Fetch Transactions
       .addCase(fetchTransactions.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchTransactions.fulfilled, (state, action) => {
         state.loading = false;
@@ -69,25 +96,39 @@ const transactionSlice = createSlice({
       })
       .addCase(fetchTransactions.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload;
       })
       // Fetch Categories
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.categories = action.payload;
       })
       // Fetch Summary
+      .addCase(fetchSummary.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchSummary.fulfilled, (state, action) => {
+        state.loading = false;
         state.summary = action.payload;
+      })
+      .addCase(fetchSummary.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       // Add Transaction
       .addCase(addTransaction.fulfilled, (state, action) => {
         state.transactions.push(action.payload);
       })
+      // Update Transaction
+      .addCase(updateTransaction.fulfilled, (state, action) => {
+        const index = state.transactions.findIndex(t => t.id === action.payload.id);
+        if (index !== -1) {
+          state.transactions[index] = action.payload;
+        }
+      })
       // Delete Transaction
       .addCase(deleteTransaction.fulfilled, (state, action) => {
-        state.transactions = state.transactions.filter(
-          (transaction) => transaction.id !== action.payload
-        );
+        state.transactions = state.transactions.filter(t => t.id !== action.payload);
       });
   },
 });

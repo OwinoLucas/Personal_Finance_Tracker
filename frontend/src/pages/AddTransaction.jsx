@@ -1,11 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import {
+  Typography,
+  TextField,
+  Button,
+  MenuItem,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
 import { addTransaction } from '../store/slices/transactionSlice';
 import { fetchCategories } from '../store/slices/categorySlice';
 
 function AddTransaction() {
   const dispatch = useDispatch();
-  const { categories, loading } = useSelector((state) => state.categories);
+  const navigate = useNavigate();
+  const { categories } = useSelector((state) => state.categories);
+  const { loading, error } = useSelector((state) => state.transactions);
+
   const [formData, setFormData] = useState({
     amount: '',
     description: '',
@@ -18,6 +30,18 @@ function AddTransaction() {
     dispatch(fetchCategories());
   }, [dispatch]);
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(addTransaction(formData))
+      .unwrap()
+      .then(() => {
+        navigate('/');
+      })
+      .catch((error) => {
+        console.error('Error adding transaction:', error);
+      });
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -26,145 +50,123 @@ function AddTransaction() {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await dispatch(addTransaction(formData));
-    // Reset form
-    setFormData({
-      amount: '',
-      description: '',
-      transaction_type: 'expense',
-      category: '',
-      date: new Date().toISOString().split('T')[0],
-    });
-  };
-
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="loading-container">
+        <CircularProgress />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900">Add New Transaction</h2>
-        </div>
-        <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                  Amount
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="number"
-                    name="amount"
-                    id="amount"
-                    value={formData.amount}
-                    onChange={handleChange}
-                    required
-                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
+    <Fragment>
+      <div className="container" style={{ padding: '2rem' }}>
+        <div className="card" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <div className="form-header">
+            <Typography variant="h4" gutterBottom>
+              Add New Transaction
+            </Typography>
 
-              <div>
-                <label htmlFor="transaction_type" className="block text-sm font-medium text-gray-700">
-                  Type
-                </label>
-                <div className="mt-1">
-                  <select
-                    id="transaction_type"
-                    name="transaction_type"
-                    value={formData.transaction_type}
-                    onChange={handleChange}
-                    required
-                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  >
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
-                  </select>
-                </div>
-              </div>
+            {error && (
+              <Alert severity="error" style={{ marginBottom: '1.5rem' }}>
+                {error}
+              </Alert>
+            )}
+          </div>
 
-              <div className="sm:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                  Description
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="description"
-                    id="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    placeholder="Enter description"
-                  />
-                </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
+              <div className="form-field" style={{ flex: '1 1 45%' }}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Amount"
+                  name="amount"
+                  type="number"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  InputProps={{
+                    startAdornment: 'KES ',
+                  }}
+                />
               </div>
-
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                  Category
-                </label>
-                <div className="mt-1">
-                  <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    required
-                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="form-field" style={{ flex: '1 1 45%' }}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                />
               </div>
-
-              <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-                  Date
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="date"
-                    name="date"
-                    id="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  />
-                </div>
+              <div className="form-field" style={{ flex: '1 1 45%' }}>
+                <TextField
+                  fullWidth
+                  required
+                  select
+                  label="Type"
+                  name="transaction_type"
+                  value={formData.transaction_type}
+                  onChange={handleChange}
+                >
+                  <MenuItem value="income">Income</MenuItem>
+                  <MenuItem value="expense">Expense</MenuItem>
+                </TextField>
+              </div>
+              <div className="form-field" style={{ flex: '1 1 45%' }}>
+                <TextField
+                  fullWidth
+                  required
+                  select
+                  label="Category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                >
+                  {categories.map((category) => (
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </div>
+              <div className="form-field" style={{ flex: '1 1 45%' }}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Date"
+                  name="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <button
+            <div className="form-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
+              <Button
+                variant="outlined"
+                onClick={() => navigate('/')}
+              >
+                Cancel
+              </Button>
+              <Button
                 type="submit"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                variant="contained"
+                color="primary"
               >
                 Add Transaction
-              </button>
+              </Button>
             </div>
           </form>
         </div>
       </div>
-    </div>
+    </Fragment>
   );
 }
 
-export default AddTransaction; 
+export default AddTransaction;

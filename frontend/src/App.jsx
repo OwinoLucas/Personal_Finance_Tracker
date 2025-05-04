@@ -12,14 +12,16 @@ import AddTransaction from './pages/AddTransaction';
 
 function PrivateRoute({ children }) {
   const { token } = useSelector((state) => state.auth);
+  console.log('PrivateRoute - token:', token);
   return token ? children : <Navigate to="/login" />;
 }
 
 function App() {
+  console.log('App component rendered');
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -27,42 +29,15 @@ function App() {
             path="/"
             element={
               <PrivateRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
+                <Layout />
               </PrivateRoute>
             }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/categories"
-            element={
-              <PrivateRoute>
-                <Layout>
-                  <Categories />
-                </Layout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/transactions/new"
-            element={
-              <PrivateRoute>
-                <Layout>
-                  <AddTransaction />
-                </Layout>
-              </PrivateRoute>
-            }
-          />
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="transactions/new" element={<AddTransaction />} />
+          </Route>
         </Routes>
       </Router>
     </ThemeProvider>

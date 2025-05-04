@@ -1,15 +1,25 @@
-import { createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axiosInstance from '../../utils/axiosInstance';
 
-const initialState = {
-  categories: [],
-  loading: false,
-  error: null,
-};
+export const fetchCategories = createAsyncThunk(
+  'categories/fetchCategories',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get('/api/categories/');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch categories');
+    }
+  }
+);
 
 const categorySlice = createSlice({
   name: 'categories',
-  initialState,
+  initialState: {
+    categories: [],
+    loading: false,
+    error: null,
+  },
   reducers: {
     setCategories: (state, action) => {
       state.categories = action.payload;
@@ -33,6 +43,21 @@ const categorySlice = createSlice({
       state.categories = state.categories.filter(c => c.id !== action.payload);
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.loading = false;
+        state.categories = action.payload;
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
 });
 
 export const {
@@ -45,21 +70,9 @@ export const {
 } = categorySlice.actions;
 
 // Async thunks
-export const fetchCategories = () => async (dispatch) => {
-  try {
-    dispatch(setLoading(true));
-    const response = await axios.get('http://localhost:8000/api/categories/');
-    dispatch(setCategories(response.data));
-  } catch (error) {
-    dispatch(setError(error.message));
-  } finally {
-    dispatch(setLoading(false));
-  }
-};
-
 export const createCategory = (categoryData) => async (dispatch) => {
   try {
-    const response = await axios.post('http://localhost:8000/api/categories/', categoryData);
+    const response = await axiosInstance.post('/api/categories/', categoryData);
     dispatch(addCategory(response.data));
   } catch (error) {
     dispatch(setError(error.message));
@@ -68,7 +81,7 @@ export const createCategory = (categoryData) => async (dispatch) => {
 
 export const editCategory = (id, categoryData) => async (dispatch) => {
   try {
-    const response = await axios.put(`http://localhost:8000/api/categories/${id}/`, categoryData);
+    const response = await axiosInstance.put(`/api/categories/${id}/`, categoryData);
     dispatch(updateCategory(response.data));
   } catch (error) {
     dispatch(setError(error.message));
@@ -77,7 +90,7 @@ export const editCategory = (id, categoryData) => async (dispatch) => {
 
 export const removeCategory = (id) => async (dispatch) => {
   try {
-    await axios.delete(`http://localhost:8000/api/categories/${id}/`);
+    await axiosInstance.delete(`/api/categories/${id}/`);
     dispatch(deleteCategory(id));
   } catch (error) {
     dispatch(setError(error.message));

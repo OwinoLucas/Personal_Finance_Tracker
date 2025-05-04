@@ -1,25 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Box,
+  Typography,
   Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   IconButton,
-  Typography,
   CircularProgress,
+  Alert,
+  Card,
+  CardContent,
+  CardActions,
 } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import {
   fetchCategories,
   createCategory,
@@ -29,13 +29,10 @@ import {
 
 function Categories() {
   const dispatch = useDispatch();
-  const { categories, loading } = useSelector((state) => state.categories);
+  const { categories, loading, error } = useSelector((state) => state.categories);
   const [open, setOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-  });
+  const [formData, setFormData] = useState({ name: '' });
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -43,12 +40,20 @@ function Categories() {
 
   const handleOpen = () => {
     setOpen(true);
+    setEditingCategory(null);
+    setFormData({ name: '' });
   };
 
   const handleClose = () => {
     setOpen(false);
     setEditingCategory(null);
-    setFormData({ name: '', description: '' });
+    setFormData({ name: '' });
+  };
+
+  const handleEdit = (category) => {
+    setEditingCategory(category);
+    setFormData({ name: category.name });
+    setOpen(true);
   };
 
   const handleSubmit = (e) => {
@@ -61,15 +66,6 @@ function Categories() {
     handleClose();
   };
 
-  const handleEdit = (category) => {
-    setEditingCategory(category);
-    setFormData({
-      name: category.name,
-      description: category.description,
-    });
-    setOpen(true);
-  };
-
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       dispatch(deleteCategory(id));
@@ -78,100 +74,127 @@ function Categories() {
 
   if (loading) {
     return (
-      <Box className="loading-spinner">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
         <CircularProgress />
-      </Box>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '2rem' }}>
+        <Alert severity="error">{error}</Alert>
+      </div>
     );
   }
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5" component="h1">
-          Categories
-        </Typography>
-        <Button variant="contained" color="primary" onClick={handleOpen}>
-          Add Category
-        </Button>
-      </Box>
+    <Fragment>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '2rem',
+        }}>
+          <Typography variant="h4">Categories</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleOpen}
+            size="large"
+          >
+            Add Category
+          </Button>
+        </div>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category.id}>
-                <TableCell>{category.name}</TableCell>
-                <TableCell>{category.description}</TableCell>
-                <TableCell align="right">
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleEdit(category)}
-                    size="small"
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleDelete(category.id)}
-                    size="small"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              style={{
+                flex: '1 1 calc(25% - 1.5rem)',
+                minWidth: '250px',
+                display: 'flex',
+              }}
+            >
+              <Card elevation={3} style={{ width: '100%' }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    {category.name}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleEdit(category)}
+                      size="large"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDelete(category.id)}
+                      size="large"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </div>
+                </CardActions>
+              </Card>
+            </div>
+          ))}
+        </div>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>
-          {editingCategory ? 'Edit Category' : 'Add New Category'}
-        </DialogTitle>
-        <form onSubmit={handleSubmit}>
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              minHeight: '300px',
+              maxHeight: '400px'
+            }
+          }}
+        >
+          <DialogTitle>
+            {editingCategory ? 'Edit Category' : 'Add Category'}
+          </DialogTitle>
           <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Name"
-              type="text"
-              fullWidth
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-            />
-            <TextField
-              margin="dense"
-              label="Description"
-              type="text"
-              fullWidth
-              multiline
-              rows={4}
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-            />
+            <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Category Name"
+                type="text"
+                fullWidth
+                value={formData.name}
+                onChange={(e) => setFormData({ name: e.target.value })}
+                required
+                sx={{ mb: 3 }}
+              />
+            </form>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained" color="primary">
+          <DialogActions sx={{ p: 3 }}>
+            <Button onClick={handleClose} variant="outlined" size="large">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              color="primary"
+              size="large"
+            >
               {editingCategory ? 'Update' : 'Add'}
             </Button>
           </DialogActions>
-        </form>
-      </Dialog>
-    </Box>
+        </Dialog>
+      </div>
+    </Fragment>
   );
 }
 
-export default Categories; 
+export default Categories;
