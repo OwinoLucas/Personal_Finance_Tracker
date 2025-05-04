@@ -1,103 +1,104 @@
 # Personal Finance Tracker
 
-A full-stack web application for tracking personal finances, built with Django and React.
+A full-stack web application for tracking personal income and expenses with detailed categorization and visualization.
 
 ## Features
 
-- User authentication (login/register)
-- Track income and expenses
-- Categorize transactions
-- View financial summaries and charts
-- Responsive design
+- User Authentication (Register, Login, Logout)
+- Transaction Management (Add, Edit, Delete)
+- Category Management
+- Dashboard with Financial Overview
+- Expense Visualization
+- Recurring Transactions
+- Transaction Filtering
+- Responsive Design
 
-## Tech Stack
+## Technology Stack
 
 ### Backend
 - Django
-- Django REST framework
-- MySQL 
+- Django REST Framework
+- MySQL Database
+- JWT Authentication
+- Django CORS Headers
 
 ### Frontend
 - React
-- Redux Toolkit
-- Material-UI
-- Recharts
-- React Router
+- Redux for State Management
+- Material-UI for UI Components
+- Axios for API Calls
+- Recharts for Data Visualization
+
+## Project Structure
+
+```
+personal_finance_tracker/
+├── Backend/                # Django backend
+│   ├── finance_tracker/   # Main Django app
+│   │   ├── migrations/    # Database migrations
+│   │   ├── models.py      # Database models
+│   │   ├── serializers.py # API serializers
+│   │   ├── views.py       # API views
+│   │   ├── urls.py        # URL routing
+│   │   ├── admin.py       # Admin configuration
+│   │   ├── apps.py        # App configuration
+│   │   └── tests.py       # Test cases
+│   ├── backend/           # Django project settings
+│   ├── manage.py          # Django management script
+│   ├── requirements.txt   # Python dependencies
+│   └── README.md          # Backend documentation
+├── frontend/              # React frontend
+│   ├── public/           # Static files
+│   ├── src/              # Source code
+│   │   ├── api/         # API configuration
+│   │   ├── components/  # Reusable components
+│   │   ├── pages/       # Page components
+│   │   ├── store/       # Redux store
+│   │   ├── utils/       # Utility functions
+│   │   ├── App.jsx      # Main component
+│   │   └── index.js     # Entry point
+│   ├── package.json     # Node dependencies
+│   └── README.md        # Frontend documentation
+├── venv/                 # Python virtual environment
+└── README.md            # Project documentation
+```
 
 ## Setup Instructions
 
-### Backend Setup
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd personal_finance_tracker
+   ```
 
-1. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+2. Set up the backend:
+   ```bash
+   cd Backend
+   # Follow Backend/README.md for setup instructions
+   ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+3. Set up the frontend:
+   ```bash
+   cd frontend
+   # Follow frontend/README.md for setup instructions
+   ```
 
-3. Run migrations:
-```bash
-python manage.py migrate
-```
+4. Start the development servers:
+   - Backend: `http://localhost:8000`
+   - Frontend: `http://localhost:3000`
 
-4. Start the development server:
-```bash
-python manage.py runserver
-```
+## API Documentation
 
-### Frontend Setup
+The API documentation is available at `http://localhost:8000/api/docs/` when the backend server is running.
 
-1. Navigate to the frontend directory:
-```bash
-cd frontend
-```
+## Contributing
 
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm start
-```
-
-## API Endpoints
-
-### Authentication
-- POST /api/auth/register/ - Register a new user
-- POST /api/auth/login/ - Login user
-- POST /api/auth/logout/ - Logout user
-
-### Transactions
-- GET /api/transactions/ - List all transactions
-- POST /api/transactions/ - Create a new transaction
-- GET /api/transactions/{id}/ - Get a specific transaction
-- PUT /api/transactions/{id}/ - Update a transaction
-- DELETE /api/transactions/{id}/ - Delete a transaction
-- GET /api/transactions/summary/ - Get financial summary
-
-### Categories
-- GET /api/categories/ - List all categories
-- POST /api/categories/ - Create a new category
-- GET /api/categories/{id}/ - Get a specific category
-- PUT /api/categories/{id}/ - Update a category
-- DELETE /api/categories/{id}/ - Delete a category
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```
-DEBUG=True
-SECRET_KEY=your-secret-key
-DATABASE_URL=sqlite:///db.sqlite3
-```
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
 
-MIT 
+This project is licensed under the MIT License - see the LICENSE file for details. 
