@@ -190,6 +190,7 @@ function Dashboard() {
           <div className="card h-100 shadow-sm">
             <div className="card-body">
               <h6 className="card-title mb-3 fw-bold"><i className="bi bi-pie-chart-fill me-2"></i>Expenses by Category</h6>
+              <hr />
               <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 {paginatedCategories.length === 0 ? (
                   <div className="alert alert-info text-center my-4">
@@ -257,6 +258,7 @@ function Dashboard() {
           <div className="card h-100 shadow-sm">
             <div className="card-body">
               <h6 className="card-title mb-3 fw-bold"><i className="bi bi-clock-history me-2"></i>Recent Transactions</h6>
+              <hr />
               <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 {paginatedTransactions.length === 0 ? (
                   <div className="alert alert-info text-center my-4">
@@ -326,7 +328,7 @@ function Dashboard() {
 
       {/* Add Transaction Form */}
       <div className="mt-4">
-        <AddTransaction />
+        <AddTransaction hideTransactionsTable={true} />
       </div>
     </div>
   );
