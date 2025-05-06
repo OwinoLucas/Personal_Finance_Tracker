@@ -8,7 +8,13 @@ export default function TextInput({ label, error, className = '', ...props }) {
         className={`form-control${error ? ' is-invalid' : ''}`}
         {...props}
       />
-      {error && <div className="invalid-feedback">{error}</div>}
+      {error && (
+        <div className="invalid-feedback">
+          {Array.isArray(error)
+            ? error.map((msg, i) => <div key={i}>{msg}</div>)
+            : error}
+        </div>
+      )}
     </div>
   );
 } 

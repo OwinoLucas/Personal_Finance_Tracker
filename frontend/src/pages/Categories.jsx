@@ -1,30 +1,6 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  IconButton,
-  CircularProgress,
-  Alert,
-  Card,
-  CardContent,
-  CardActions,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
-import {
-  fetchCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} from '../store/slices/categorySlice';
+import { fetchCategories, createCategory, updateCategory, deleteCategory } from '../store/slices/categorySlice';
 import Button from '../components/ui/Button';
 import TextInput from '../components/ui/TextInput';
 
@@ -96,70 +72,71 @@ function Categories() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Categories</h2>
         <Button onClick={handleOpen} className="btn btn-primary">
-          Add Category
+          <i className="bi bi-plus-circle me-2"></i> Add Category
         </Button>
       </div>
       <div className="row g-4">
-        {categories.map((category) => (
-          <div key={category.id} className="col-12 col-md-6 col-lg-4">
-            <div className="card h-100">
-              <div className="card-body d-flex flex-column justify-content-between">
-                <h5 className="card-title">{category.name}</h5>
-                <div className="mt-3 d-flex gap-2">
-                  <button
-                    className="btn btn-outline-primary btn-sm"
-                    onClick={() => handleEdit(category)}
-                  >
-                    <span className="bi bi-pencil"></span> Edit
-                  </button>
-                  <button
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={() => handleDelete(category.id)}
-                  >
-                    <span className="bi bi-trash"></span> Delete
-                  </button>
+        {categories.length === 0 ? (
+          <div className="col-12">
+            <div className="alert alert-info text-center my-4">
+              <i className="bi bi-emoji-smile fs-3 mb-2 d-block"></i>
+              No categories yet. Click <strong>Add Category</strong> to create your first one!
+            </div>
+          </div>
+        ) : (
+          categories.map((category) => (
+            <div key={category.id} className="col-12 col-md-6 col-lg-4">
+              <div className="card h-100 shadow-sm">
+                <div className="card-body d-flex flex-column justify-content-between">
+                  <h5 className="card-title">{category.name}</h5>
+                  <div className="mt-3 d-flex gap-2">
+                    <button
+                      className="btn btn-outline-primary btn-sm d-flex align-items-center"
+                      onClick={() => handleEdit(category)}
+                    >
+                      <i className="bi bi-pencil me-1"></i> Edit
+                    </button>
+                    <button
+                      className="btn btn-outline-danger btn-sm d-flex align-items-center"
+                      onClick={() => handleDelete(category.id)}
+                    >
+                      <i className="bi bi-trash me-1"></i> Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            minHeight: '300px',
-            maxHeight: '400px'
-          }
-        }}
-      >
-        <DialogTitle>
-          {editingCategory ? 'Edit Category' : 'Add Category'}
-        </DialogTitle>
-        <DialogContent>
-          <form onSubmit={handleSubmit} className="mt-3">
-            <TextInput
-              autoFocus
-              label="Category Name"
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ name: e.target.value })}
-              required
-            />
-          </form>
-        </DialogContent>
-        <DialogActions className="p-3">
-          <Button onClick={handleClose} variant="outline-secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} variant="primary">
-            {editingCategory ? 'Update' : 'Add'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+
+      {/* Modal for Add/Edit Category */}
+      <div className={`modal fade${open ? ' show d-block' : ''}`} tabIndex="-1" style={open ? { background: 'rgba(0,0,0,0.5)' } : {}}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">{editingCategory ? 'Edit Category' : 'Add Category'}</h5>
+              <button type="button" className="btn-close" onClick={handleClose}></button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
+                <TextInput
+                  label="Category Name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={e => setFormData({ name: e.target.value })}
+                />
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editingCategory ? 'Update' : 'Add'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

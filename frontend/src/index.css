@@ -1,4 +1,5 @@
 @import url('../node_modules/bootstrap/dist/css/bootstrap.min.css');
+@import url('../node_modules/bootstrap-icons/font/bootstrap-icons.css');
 
 /* Basic CSS reset */
 * {
@@ -91,4 +92,9 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
   */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
+  opacity: 1;
 }

@@ -31,10 +31,12 @@ function Login() {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center min-vh-100">
-      <div className="card shadow w-100" style={{ maxWidth: 400 }}>
-        <div className="card-body">
-          <h1 className="card-title text-center mb-4">Sign in</h1>
+    <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+      <div className="card shadow-lg w-100" style={{ maxWidth: 800, borderRadius: '1rem' }}>
+        <div className="card-body p-5">
+          <h1 className="card-title text-center mb-4 fw-bold text-primary" style={{ fontSize: '2.2rem', letterSpacing: '0.02em' }}>
+            Sign in
+          </h1>
           <form onSubmit={handleSubmit}>
             <TextInput
               label="Username"
@@ -45,6 +47,7 @@ function Login() {
               required
               value={formData.username}
               onChange={handleChange}
+              error={error?.username}
             />
             <TextInput
               label="Password"
@@ -54,14 +57,15 @@ function Login() {
               required
               value={formData.password}
               onChange={handleChange}
+              error={error?.password}
             />
-            <ErrorMessage>{error}</ErrorMessage>
-            <Button type="submit" variant="primary" className="w-100 mb-3">
+            <ErrorMessage>{error?.non_field_errors}</ErrorMessage>
+            <Button type="submit" variant="primary" className="w-100 mb-3" style={{ fontWeight: 600, fontSize: '1.1rem' }}>
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
-            <div className="text-center">
+            <div className="text-center mt-3">
               <span className="text-secondary">Don't have an account? </span>
-              <Link to="/register" className="text-primary">Sign Up</Link>
+              <Link to="/register" className="fw-bold text-primary text-decoration-underline">Sign Up</Link>
             </div>
           </form>
         </div>

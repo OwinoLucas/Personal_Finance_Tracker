@@ -1,26 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosInstance';
 
 const API_URL = 'http://localhost:8000/api';
-
-// Add axios instance with token
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-});
-
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Token ${token}`;
-  }
-  return config;
-});
 
 export const fetchUser = createAsyncThunk(
   'auth/fetchUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get('/user/');
+      const response = await axiosInstance.get('/api/user/');
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -35,7 +22,7 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/login/', {
+      const response = await axiosInstance.post('/api/login/', {
         username: credentials.username,
         password: credentials.password
       });
@@ -66,7 +53,7 @@ export const register = createAsyncThunk(
         password2: userData.confirmPassword
       };
       
-      const response = await axios.post(`${API_URL}/register/`, registrationData);
+      const response = await axiosInstance.post('/api/register/', registrationData);
       if (!response.data.token) {
         throw new Error('No token received from server');
       }
@@ -74,7 +61,7 @@ export const register = createAsyncThunk(
       return response.data;
     } catch (error) {
       if (error.response) {
-        return rejectWithValue(error.response.data.message || 'Registration failed');
+        return rejectWithValue(error.response.data);
       }
       return rejectWithValue(error.message || 'Registration failed');
     }
