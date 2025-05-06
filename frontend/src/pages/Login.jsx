@@ -1,15 +1,9 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Container,
-  Paper,
-  CircularProgress,
-} from '@mui/material';
+import ErrorMessage from '../components/ui/ErrorMessage';
+import Button from '../components/ui/Button';
+import TextInput from '../components/ui/TextInput';
 import { login } from '../store/slices/authSlice';
 
 function Login() {
@@ -37,72 +31,42 @@ function Login() {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 8 }}>
-      <Paper elevation={3} sx={{ p: 6, borderRadius: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Typography component="h1" variant="h4" sx={{ mb: 4 }}>
-            Sign in
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
+    <div className="container d-flex justify-content-center align-items-center min-vh-100">
+      <div className="card shadow w-100" style={{ maxWidth: 400 }}>
+        <div className="card-body">
+          <h1 className="card-title text-center mb-4">Sign in</h1>
+          <form onSubmit={handleSubmit}>
+            <TextInput
               label="Username"
               name="username"
+              type="text"
               autoComplete="username"
               autoFocus
+              required
               value={formData.username}
               onChange={handleChange}
-              sx={{ mb: 3 }}
             />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
+            <TextInput
               label="Password"
+              name="password"
               type="password"
-              id="password"
               autoComplete="current-password"
+              required
               value={formData.password}
               onChange={handleChange}
-              sx={{ mb: 3 }}
             />
-            {error && (
-              <Typography color="error" sx={{ mb: 2 }}>
-                {error}
-              </Typography>
-            )}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              sx={{ mt: 3, mb: 2, py: 1.5 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Sign In'}
+            <ErrorMessage>{error}</ErrorMessage>
+            <Button type="submit" variant="primary" className="w-100 mb-3">
+              {loading ? 'Signing in...' : 'Sign In'}
             </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="body1">
-                Don't have an account?{' '}
-                <Link to="/register" style={{ textDecoration: 'none', color: '#1976d2' }}>
-                  Sign Up
-                </Link>
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Paper>
-    </Container>
+            <div className="text-center">
+              <span className="text-secondary">Don't have an account? </span>
+              <Link to="/register" className="text-primary">Sign Up</Link>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
 

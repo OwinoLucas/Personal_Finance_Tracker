@@ -2,7 +2,6 @@ import { useState, useEffect, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,6 +25,8 @@ import {
   updateCategory,
   deleteCategory,
 } from '../store/slices/categorySlice';
+import Button from '../components/ui/Button';
+import TextInput from '../components/ui/TextInput';
 
 function Categories() {
   const dispatch = useDispatch();
@@ -74,126 +75,92 @@ function Categories() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-        <CircularProgress />
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ padding: '2rem' }}>
-        <Alert severity="error">{error}</Alert>
+      <div className="container py-4">
+        <div className="alert alert-danger" role="alert">{error}</div>
       </div>
     );
   }
 
   return (
-    <Fragment>
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem' }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem',
-        }}>
-          <Typography variant="h4">Categories</Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={handleOpen}
-            size="large"
-          >
-            Add Category
-          </Button>
-        </div>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
-          {categories.map((category) => (
-            <div
-              key={category.id}
-              style={{
-                flex: '1 1 calc(25% - 1.5rem)',
-                minWidth: '250px',
-                display: 'flex',
-              }}
-            >
-              <Card elevation={3} style={{ width: '100%' }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {category.name}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleEdit(category)}
-                      size="large"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDelete(category.id)}
-                      size="large"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </div>
-                </CardActions>
-              </Card>
-            </div>
-          ))}
-        </div>
-
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{
-            sx: {
-              minHeight: '300px',
-              maxHeight: '400px'
-            }
-          }}
-        >
-          <DialogTitle>
-            {editingCategory ? 'Edit Category' : 'Add Category'}
-          </DialogTitle>
-          <DialogContent>
-            <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Category Name"
-                type="text"
-                fullWidth
-                value={formData.name}
-                onChange={(e) => setFormData({ name: e.target.value })}
-                required
-                sx={{ mb: 3 }}
-              />
-            </form>
-          </DialogContent>
-          <DialogActions sx={{ p: 3 }}>
-            <Button onClick={handleClose} variant="outlined" size="large">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              variant="contained"
-              color="primary"
-              size="large"
-            >
-              {editingCategory ? 'Update' : 'Add'}
-            </Button>
-          </DialogActions>
-        </Dialog>
+    <div className="container py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Categories</h2>
+        <Button onClick={handleOpen} className="btn btn-primary">
+          Add Category
+        </Button>
       </div>
-    </Fragment>
+      <div className="row g-4">
+        {categories.map((category) => (
+          <div key={category.id} className="col-12 col-md-6 col-lg-4">
+            <div className="card h-100">
+              <div className="card-body d-flex flex-column justify-content-between">
+                <h5 className="card-title">{category.name}</h5>
+                <div className="mt-3 d-flex gap-2">
+                  <button
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={() => handleEdit(category)}
+                  >
+                    <span className="bi bi-pencil"></span> Edit
+                  </button>
+                  <button
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => handleDelete(category.id)}
+                  >
+                    <span className="bi bi-trash"></span> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            minHeight: '300px',
+            maxHeight: '400px'
+          }
+        }}
+      >
+        <DialogTitle>
+          {editingCategory ? 'Edit Category' : 'Add Category'}
+        </DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit} className="mt-3">
+            <TextInput
+              autoFocus
+              label="Category Name"
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ name: e.target.value })}
+              required
+            />
+          </form>
+        </DialogContent>
+        <DialogActions className="p-3">
+          <Button onClick={handleClose} variant="outline-secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} variant="primary">
+            {editingCategory ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, Fragment, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
@@ -102,71 +102,79 @@ function Dashboard() {
   }
 
   return (
-    <Fragment>
-      <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Summary Cards */}
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-          <Card style={{ minWidth: '250px', flex: 1 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Total Balance</Typography>
-              <Typography variant="h4" color="primary">
-                KES {summary?.net_balance || 0}
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card style={{ minWidth: '250px', flex: 1 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Total Income</Typography>
-              <Typography variant="h4" color="success.main">
-                KES {summary?.total_income || 0}
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card style={{ minWidth: '250px', flex: 1 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Total Expenses</Typography>
-              <Typography variant="h4" color="error.main">
-                KES {summary?.total_expenses || 0}
-              </Typography>
-            </CardContent>
-          </Card>
+    <div className="container py-4">
+      {/* Summary Cards */}
+      <div className="row g-3 mb-4">
+        <div className="col-md-4">
+          <div className="card h-100">
+            <div className="card-body">
+              <h6 className="card-title">Total Balance</h6>
+              <h4 className="text-primary">KES {summary?.net_balance || 0}</h4>
+            </div>
+          </div>
         </div>
+        <div className="col-md-4">
+          <div className="card h-100">
+            <div className="card-body">
+              <h6 className="card-title">Total Income</h6>
+              <h4 className="text-success">KES {summary?.total_income || 0}</h4>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="card h-100">
+            <div className="card-body">
+              <h6 className="card-title">Total Expenses</h6>
+              <h4 className="text-danger">KES {summary?.total_expenses || 0}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* Filter Section */}
-        <Card style={{ marginBottom: '2rem' }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+      {/* Filter Section */}
+      <div className="card mb-4">
+        <div className="card-body">
+          <div className="row g-3 align-items-end">
+            <div className="col-md-3">
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   label="Start Date"
                   value={filters.startDate}
                   onChange={(date) => handleFilterChange('startDate', date)}
-                  renderInput={(params) => <TextField {...params} />}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
                 />
+              </LocalizationProvider>
+            </div>
+            <div className="col-md-3">
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   label="End Date"
                   value={filters.endDate}
                   onChange={(date) => handleFilterChange('endDate', date)}
-                  renderInput={(params) => <TextField {...params} />}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
                 />
               </LocalizationProvider>
+            </div>
+            <div className="col-md-3">
               <TextField
                 select
                 label="Type"
                 value={filters.type}
                 onChange={(e) => handleFilterChange('type', e.target.value)}
-                style={{ minWidth: 120 }}
+                fullWidth
               >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="income">Income</MenuItem>
                 <MenuItem value="expense">Expense</MenuItem>
               </TextField>
+            </div>
+            <div className="col-md-3">
               <TextField
                 select
                 label="Category"
                 value={filters.category}
                 onChange={(e) => handleFilterChange('category', e.target.value)}
-                style={{ minWidth: 120 }}
+                fullWidth
               >
                 <MenuItem value="">All</MenuItem>
                 {categories.map((category) => (
@@ -175,26 +183,22 @@ function Dashboard() {
                   </MenuItem>
                 ))}
               </TextField>
-            </Box>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* Expenses by Category & Recent Transactions */}
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-          {/* Expenses by Category Card */}
-          <Card style={{ flex: 1, minWidth: '300px', maxHeight: '400px' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Expenses by Category</Typography>
-              <div style={{ 
-                maxHeight: '300px', 
-                overflowY: 'auto',
-                paddingRight: '8px',
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#888 #f1f1f1'
-              }}>
+      {/* Expenses by Category & Recent Transactions */}
+      <div className="row g-3 mb-4">
+        {/* Expenses by Category Card */}
+        <div className="col-md-6">
+          <div className="card h-100">
+            <div className="card-body">
+              <h6 className="card-title">Expenses by Category</h6>
+              <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 <List>
                   {paginatedCategories.map(({ name, amount }) => (
-                    <div key={name} style={{ marginBottom: '1rem' }}>
+                    <div key={name} className="mb-3">
                       <ListItem disablePadding>
                         <ListItemText
                           primary={name}
@@ -204,14 +208,7 @@ function Dashboard() {
                           <LinearProgress
                             variant="determinate"
                             value={(amount / totalExpenses) * 100}
-                            sx={{
-                              height: 10,
-                              borderRadius: 5,
-                              backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                              '& .MuiLinearProgress-bar': {
-                                backgroundColor: 'primary.main',
-                              },
-                            }}
+                            sx={{ height: 10, borderRadius: 5, backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
                           />
                         </div>
                       </ListItem>
@@ -219,7 +216,7 @@ function Dashboard() {
                   ))}
                 </List>
               </div>
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <div className="d-flex justify-content-center mt-2">
                 <Pagination
                   count={totalCategoryPages}
                   page={categoriesPage}
@@ -227,24 +224,20 @@ function Dashboard() {
                   color="primary"
                   size="small"
                 />
-              </Box>
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          {/* Recent Transactions Card */}
-          <Card style={{ flex: 1, minWidth: '300px', maxHeight: '400px' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Recent Transactions</Typography>
-              <div style={{ 
-                maxHeight: '300px', 
-                overflowY: 'auto',
-                paddingRight: '8px',
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#888 #f1f1f1'
-              }}>
+        {/* Recent Transactions Card */}
+        <div className="col-md-6">
+          <div className="card h-100">
+            <div className="card-body">
+              <h6 className="card-title">Recent Transactions</h6>
+              <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 <List>
                   {filteredTransactions.slice(0, itemsPerPage).map((transaction) => (
-                    <div key={transaction.id} style={{ marginBottom: '1rem' }}>
+                    <div key={transaction.id} className="mb-3">
                       <ListItem disablePadding>
                         <ListItemText
                           primary={transaction.description}
@@ -258,16 +251,16 @@ function Dashboard() {
                   ))}
                 </List>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Add Transaction Form */}
-        <div>
-          <AddTransaction />
+            </div>
+          </div>
         </div>
       </div>
-    </Fragment>
+
+      {/* Add Transaction Form */}
+      <div>
+        <AddTransaction />
+      </div>
+    </div>   
   );
 }
 
