@@ -53,22 +53,6 @@ function AddTransaction({ hideTransactionsTable = false }) {
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  const handleDateChange = (date) => {
-    setFormData((prev) => ({
-      ...prev,
-      date,
-    }));
-    setErrors((prev) => ({ ...prev, date: undefined }));
-  };
-
-  const handleEndDateChange = (date) => {
-    setFormData((prev) => ({
-      ...prev,
-      end_date: date,
-    }));
-    setErrors((prev) => ({ ...prev, end_date: undefined }));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validate();
