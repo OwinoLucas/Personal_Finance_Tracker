@@ -292,7 +292,7 @@ function Dashboard() {
                 )}
               </div>
               {/* Pagination for Recent Transactions */}
-              {paginatedTransactions.length > 0 && totalTransactionPages > 1 && (
+              {paginatedTransactions.length > 0 && (
                 <div className="d-flex justify-content-center mt-2 align-items-center gap-1">
                   <button
                     className="btn btn-sm btn-outline-primary"
