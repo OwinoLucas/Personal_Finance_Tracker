@@ -3,12 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^7.0.2",
-    "@mui/material": "^7.0.2",
-    "@mui/x-date-pickers": "^8.2.0",
-    "@mui/x-date-pickers-pro": "^8.2.0",
     "@reduxjs/toolkit": "^2.2.1",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
@@ -17,8 +11,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^9.1.0",
-    "react-router-dom": "^6.22.1",
-    "recharts": "^2.15.3"
+    "react-router-dom": "^6.22.1"
   },
   "scripts": {
     "start": "react-scripts start",
