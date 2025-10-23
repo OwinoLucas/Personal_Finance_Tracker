@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'https://personal-finance-tracker-uyzq.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,4 +33,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance; 
+export default axiosInstance;
