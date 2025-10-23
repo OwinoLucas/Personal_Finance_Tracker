@@ -32,7 +32,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = os.environ.get("DEBUG")
 
 ALLOWED_HOSTS = [
-    "https://personal-finance-tracker-uyzq.onrender.com",
+    "personal-finance-tracker-uyzq.onrender.com",
     "localhost",
     "127.0.0.1",
 ]
